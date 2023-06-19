@@ -1,0 +1,577 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include<windows.h>
+#include<iostream>
+#include<stdlib.h>
+#pragma comment(lib,"winmm.lib")
+#include<mmsystem.h>
+#include <stdio.h>
+#include <string.h>
+#define MAX_ACCOUNTS 100  // 最大账户数
+#define MAX_ACCOUNT 3     // 账户
+#define MAX_LEN 19        // 最大长度
+using namespace std;
+void  dlcj();
+char* dlym();
+int cjym();
+struct Account {          // 定义账户结构体
+	int id;               // 账户ID
+	char account[20];     // 账户名
+	char password[20];    // 账户密码
+	double balance;       // 账户余额
+};
+
+void a1(int x) {          // 改变控制台输出样式
+	switch (x) {
+		case 1:
+			printf("***************************************************\n");
+			break;
+		case 2:
+			printf("*-------------------------------------------------*\n");
+			break;
+	}
+}
+
+void a2(short x) {        // 改变控制台字体颜色
+	if (x >= 0 && x <= 15) {
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), x);
+	} else {
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7); // 默认为白色
+	}
+}
+void xgmm(Account* accounts, int count, int index) {// 修改密码功能函数
+	// 声明函数
+	char* dlym();
+	// 输出修改密码的标题
+	a1(1);
+	printf("*****************修改密码**************************\n");
+	// 定义两个存储新密码的数组，初始值皆为0
+	char mm[20] = { '\0' };
+	char mm2[20] = { '\0' };
+	// 输出提示语句，并获取用户输入的新密码
+	a1(1);
+	printf("请输入你想要修改的密码：");
+	scanf("%s", mm);
+	while(1)
+	{
+		if(strcmp(mm,accounts[index].password ) == 0)
+		{
+			printf("新密码与原密码相同，请输入你想要修改的密码：");
+	        scanf("%s", mm);
+		}
+		else
+		break; 
+	}
+	// 输出提示语句，并获取用户确认输入的新密码
+	printf("请再次输入你想要修改的密码：");
+	scanf("%s", mm2);
+	// 开始循环，判断两次输入的密码是否相同
+	while (1) {
+		// 如果两次输入的密码相同
+		if (strcmp(mm, mm2) == 0) {
+			// 使用strncpy函数将新密码复制到对应账户的密码字段
+			strncpy(accounts[index].password, mm, sizeof(accounts[index].password) - 1);
+			// 将存储新密码的数组最后一个元素赋值为0
+			accounts[index].password[sizeof(accounts[index].password) - 1] = '\0';
+			// 清空控制台屏幕，并输出提示信息
+			a1(1);
+			printf("修改成功!\n");
+			// 跳出循环
+			break;
+		} else {
+			// 如果两次输入的密码不一致，输出提示信息，让用户重新输入新密码
+			printf("两次输入不一致，请重新输入新密码：");
+			scanf("%s", mm2);
+		}
+	}
+	// 暂停控制台，等待用户操作
+	system("pause");
+	// 清空控制台屏幕
+	system("cls");
+	// 调用函数，返回上一级菜单
+}
+void zxzh(Account * accounts, int count, int i) {
+	//注销
+	a1(1);
+	printf("*****************注销账号**************************\n");
+	a1(1);
+	printf("您确定要注销当前账号吗？(Y/N)");
+	char choice;
+	scanf(" %c", &choice);  // 获取用户输入，Y、y 代表确认注销，N、n 代表取消注销
+	if (choice == 'Y' || choice == 'y') {
+		// 从第 i 个账号开始，将后面的账号信息向前移动一个位置，覆盖掉当前账号信息
+		for (int j = i; j < count; j++) {
+			accounts[j] = accounts[j + 1];
+		}
+		count=count-1;  // 注销成功后，账户数量减 1
+		printf("账号注销成功\n");
+		system("pause");
+	} else if (choice == 'N' || choice == 'n') {
+		return;  // 如果用户取消注销，直接返回，不做任何操作
+	}
+}
+void cqqq(Account* accounts, int count, int i, int j) {
+	//存钱与取钱
+	double qq;
+	if (j == 1) {   // 操作一：取款
+		printf("你账号里面还有%lf元钱\n", accounts[i].balance);
+		printf("请输入你想要取的金额：");
+		scanf("%lf", &qq);
+		printf("\n");
+		while (1) { // 循环判断输入金额是否合法
+			if (qq > accounts[i].balance) { // 当输入金额大于余额时，提示余额不足
+				printf("余额不足，请重新输入你想要取的金额:");
+				scanf("%lf", &qq);
+			}
+			if (qq <= accounts[i].balance) { // 当输入金额小于等于余额时，更新余额并结束循环
+				accounts[i].balance = accounts[i].balance - qq;
+				printf("你当前还有%lf元钱\n", accounts[i].balance);
+				system("pause");
+				break;
+			}
+		}
+	}
+	if (j == 2) {   // 操作二：存款
+		printf("你账号里面还有%lf元钱\n", accounts[i].balance);
+		printf("请输入你想要存入的金额：");
+		scanf("%lf", &qq);
+		accounts[i].balance = accounts[i].balance + qq;   // 更新余额
+		printf("你当前还有%lf元钱\n", accounts[i].balance);
+		system("pause");
+	}
+}
+void zzhs(Account* accounts, int count, int j) {
+	//转账函数
+	a1(1); // 调用函数a1，打印1个空格
+	printf("*****************账户页面**************************\n"); // 打印账户页面
+	a1(1); // 调用函数a1，打印1个空格
+	printf("*ID\t账号信息\t\t\t账号余额  *\n"); // 打印账户信息表头
+	for (int i = 0; i < count; i++) { // 遍历所有账户信息
+		printf("*%d\t%s\t\t\t%.2lf\t\t  *\n", accounts[i].id, accounts[i].account,accounts[i].balance); // 打印当前账户信息
+		a1(2); // 调用函数a1，打印2个空格
+	}
+	printf("请输入你想要转到的账户："); // 提示用户输入目标账户信息
+	char zh[20] = { '\0' }; // 定义一个char类型的数组，存储用户输入的目标账户信息
+	int bj = 0; // 定义一个int变量，用于标记是否匹配成功
+	scanf("%s", zh); // 读取用户输入的目标账户信息
+	printf("\n"); // 换行
+	int xx=0;
+	int i=0;
+	while(1) {
+		if (strcmp(zh, accounts[j].account) == 0) { // 匹配成功
+			printf("不能转给自己，请重新输入你想要转到的账户\n"); // 提示用户重新输入目标账户信息
+			scanf("%s", zh); // 重新读取用户输入的目标账户信息
+		} else
+			break;
+	}
+	while(1) {
+		for( i=0; i<count; i++) {
+			if(strcmp(zh, accounts[i].account) == 0)
+				break;
+		}
+		if(i==count) {
+			printf("不能转给不存在的用户，请重新输入你想要转到的账户\n"); // 提示用户重新输入目标账户信息
+			scanf("%s", zh);
+		} else
+			break;
+	}
+	double qq = 0; // 定义一个double类型的变量，存储用户输入的转账金额
+	printf("请输入转账金额："); // 提示用户输入转账金额
+	scanf("%lf", &qq); // 读取用户输入的转账金额
+
+	for ( i = 0; i <= count; i++) { // 遍历所有账户信息
+		if (strcmp(zh, accounts[i].account) == 0) { // 匹配成功
+			while (1) { // 循环，直到转账成功为止
+				if (qq > accounts[j].balance) { // 转账金额大于当前账户余额
+					printf("余额不足，请重新输入你想要转出的金额:"); // 提示用户重新输入转账金额
+					printf("你当前还有%lf元钱\n", accounts[j].balance); // 提示用户当前账户余额
+					scanf("%lf", &qq); // 读取用户输入的重新转账金额
+				}
+				if (qq <= accounts[i].balance) { // 转账金额小于等于目标账户余额
+					accounts[j].balance = accounts[j].balance - qq; // 当前账户余额减去转账金额
+					printf("你当前还有%lf元钱\n", accounts[j].balance); // 提示用户当前账户余额
+					break; // 跳出内层循环，表示转账成功
+				}
+			}
+			accounts[i].balance = accounts[i].balance + qq; // 目标账户余额加上转账金额
+			printf("你转入的账户还有%lf\n", accounts[i].balance); // 提示用户目标账户余额
+			system("pause");
+			break; // 跳出外层循环
+		}
+	}
+}
+int csym() { //初始页面
+	// 打开文件，读取账户信息
+	FILE* file = NULL;
+	char filename[] = "账号信息.txt";   // 账户信息所在文件路径
+
+	file = fopen(filename, "r");
+
+	if (!file) {
+		printf("错误1\n");
+		return -1;
+	}
+
+	Account accounts[MAX_ACCOUNTS] = { 0 };
+	int count = 0;
+
+	// 读取文件中的账户信息，保存到结构体数组中
+	while (count < MAX_ACCOUNTS && !feof(file)) {
+		int id = 0;
+		char account[20] = { '\0' };
+		char password[20] = { '\0' };
+		double balance = 0.0;
+
+		fscanf(file, "%d %19s %19s %lf", &id, account, password, &balance);
+
+		if (feof(file)) {
+			break;
+		}
+
+		// 将帐户信息保存到结构体数组中
+		accounts[count].id = id;
+		strcpy(accounts[count].account, account);
+		strcpy(accounts[count].password, password);
+		accounts[count].balance = balance;
+
+		count++;
+	}
+
+	fclose(file);
+
+	// 打印所有帐户信息
+	a2(3);
+	a1(1);
+	printf("*****************小金库****************************\n");
+	a1(1);
+	printf("*ID\t账号信息\t账号密码\t账号余额  *\n");
+	for (int i = 0; i < count; i++) {
+		printf("*%d\t%s\t%s\t\t%.2lf\t\t  *\n", accounts[i].id, accounts[i].account, accounts[i].password, accounts[i].balance);
+		a1(2);
+	}
+
+	system("pause");
+	system("cls");
+	a2(16);
+	dlcj();
+	// 返回函数调用处
+	return 0;
+}
+char* dlym() {
+	//登录函数
+	int sum = 0; // 密码输入错误次数
+	int i = 0;
+	FILE* file = NULL; //文件指针
+	char filename[] = "账号信息.txt";   // 账户信息所在文件路径
+
+	file = fopen(filename, "r"); // 打开文件
+
+	if (!file) {
+		printf("错误1\n");
+	}
+	Account accounts[MAX_ACCOUNTS] = { 0 }; //定义结构体数组，用于存储账户信息
+	int count = 0; //数组中已存储的账户信息个数
+
+// 读取账户信息
+	while (count < MAX_ACCOUNTS && !feof(file)) {
+		int id = 0;
+		char account[20] = { '\0' };
+		char password[20] = { '\0' };
+		double balance = 0.0;
+
+		// 从文件中读取账户信息
+		fscanf(file, "%d %20s %20s %lf", &id, account, password,&balance);
+
+		if (feof(file)) {
+			break;
+		}
+
+		// 将账户信息保存到结构体数组中
+		accounts[count].id = id;
+		strcpy(accounts[count].account, account);
+		strcpy(accounts[count].password, password);
+		accounts[count].balance = balance;
+		count++;
+	}
+
+// 关闭文件
+	fclose(file);
+
+	char zh[20] = { '\0' };
+	char mm[20] = { '\0' };
+	int flag = 0; // 标记变量，表示是否成功匹配账号密码
+
+// 循环等待用户登录
+	while (sum < MAX_ACCOUNT && flag == 0) {
+		printf("请输入账号：");
+		scanf("%s", zh);
+		printf("\n");
+		a1(2);
+		printf("请输入密码：");
+		scanf("%s", mm);
+		printf("\n");
+		a1(2);
+
+		// 遍历账户信息数组进行账号密码匹配
+		for (i = 0; i <= count; i++) {
+			if (strcmp(zh, accounts[i].account) == 0 && strcmp(mm, accounts[i].password) == 0) { // 匹配成功
+				printf("登录成功!\n");
+				system("pause");
+				flag = 1; // 设置标记变量为1
+				break; // 跳出内层循环
+			}
+		}
+
+		if (flag == 1) { // 匹配成功，跳出外层循环
+			break;
+		}
+
+		if (flag == 0) { // 如果标记变量为0，则匹配失败
+			// 匹配失败，提示错误并增加输入错误次数
+			printf("密码错误，请重新输入\n");
+			sum++;
+
+			// 如果连续输入三次错误密码，则程序退出
+			if (sum == 3) {
+				printf("账号密码错误三次");
+				exit(0);
+			}
+		}
+	}
+
+	int xh; // 操作序号
+	// 如果标记变量为1，则登录成功
+	if (flag == 1) {
+		system("cls");
+		a2(4);
+		a1(1);
+		printf("**------------------*1修改密码-------------------**\n");
+		a1(2);
+		printf("**-----------------*2注销账号--------------------**\n");
+		a1(1);
+		printf("**-----------------*3提取现金--------------------**\n");
+		a1(1);
+		printf("**------------------*4转账-----------------------**\n");
+		a1(2);
+		printf("**-----------------*5存钱------------------------**\n");
+		a1(1);
+		printf("**-----------------*6返回------------------------**\n");
+		a1(1);
+		printf("**-----------------*7退出系统--------------------**\n");
+		a1(2);
+		printf("请输入选择的编号：");
+		int  ch;
+		scanf("%d", &ch);
+		switch (ch) {
+			case 1:
+				system("cls");
+				a2(8);
+				xgmm(accounts, count, i);
+				xh = 0;
+				break;
+			case 2:
+				system("cls");
+				a2(6);
+				zxzh(accounts, count, i);
+				xh = 0;
+				break;
+			case 3:
+				system("cls");
+				a2(9);
+				a1(1);
+				printf("**-----------------*3提取现金--------------------**\n");
+				a1(1);
+				cqqq(accounts, count, i, 1);
+				xh = 0;
+				break;
+			case 4:
+				system("cls");
+				a2(4);
+				a1(1);
+				printf("**------------------*4转账-----------------------**\n");
+				a1(2);
+				zzhs(accounts, count, i);
+				xh = 0;
+				break;
+			case 5:
+				system("cls");
+				a2(8);
+				a1(2);
+				printf("**-----------------*5存钱------------------------**\n");
+				a1(1);
+				cqqq(accounts, count, i, 2);
+				xh = 0;
+				break;
+			case 6:
+				xh = 0;
+				break;
+			case 7:
+				exit(0);
+				break;
+			default:
+				break;
+		}
+		file = fopen(filename, "w+");
+
+		if (!file) {
+			printf("错误1\n"); // 打开文件失败
+		}
+		for (i = 0; i < count; i++) {
+			fprintf(file, "%d %20s %20s %.2lf\n", accounts[i].id, accounts[i].account, accounts[i].password, accounts[i].balance);
+		}
+		// 关闭文件
+		fclose(file);
+	}
+
+	else { // 如果登录失败
+		printf("登录失败，请检查账号密码后再次尝试！\n");
+		exit(0);
+	}
+	fclose(file);
+// 关闭文件
+}
+void  dlcj() {
+	//登录创建账单
+	a2(4);
+	a1(1);
+	printf("**------------------*1登录账号-------------------**\n");
+	a1(2);
+	printf("**-----------------*2创建账号--------------------**\n");
+	a1(1);
+	printf("**-----------------*3返回上一页面----------------**\n");
+	a1(2);
+	printf("**-----------------*4结束操作--------------------**\n");
+	a1(1);
+	printf("请输入选择的编号：");
+	char ch = '0';
+	char zh[20] = { '\0' };
+	scanf("%c", &ch);
+	switch (ch) {
+		case '1':
+			system("cls");
+			a2(5);
+			a1(1);
+			printf("**------------------*登录页面--------------------**\n");
+			a1(1);
+			dlym();
+			a2(16);
+			break;
+		case '2':
+			a2(9);
+			system("cls");
+			a1(1);
+			printf("**------------------*创建账号页面--------------**\n");
+			a1(1);
+			cjym();
+			a2(16);
+			break;
+		case '3':
+			system("cls");
+			break;
+		case '4':
+			exit(0);
+			break;
+		default:
+			break;
+	}
+	a2(16);
+}
+
+int cjym() {
+	//初始页面
+	// 打开文件，读取账户信息
+	FILE* file = NULL;
+	char filename[] = "账号信息.txt"; // 账户信息所在文件路径
+	file = fopen(filename, "r");
+
+	if (!file) {
+		printf("错误1\n"); // 打开文件失败
+		return -1;
+	}
+
+	int sum = 0;
+	int i = 0;
+	int id = 0;
+	char a[100];
+
+	while (fgets(a, sizeof(a), file) != NULL) { // 每次读取一行字符串，存入a中，直到读到文件末尾
+		char* token;
+		char* next_token = NULL;
+		token = strtok(a, " "); // 使用空格分割字符串
+		id = atoi(token); // 将第一个字段转换为整型（账号ID）
+	}
+	fclose(file); // 关闭文件
+
+	id++; // 账号ID自增1
+
+	// 打开文件，读取账户信息
+	file = fopen(filename, "a+");
+
+	if (!file) {
+		printf("错误1\n"); // 打开文件失败
+		return -1;
+	}
+
+	Account accounts[MAX_ACCOUNTS] = { 0 }; // 定义Account结构体数组，用于保存每个账户的信息
+	int count = 0; // 计数器，用于统计账户数量，初始值为0
+
+	// 从文件中读取账户信息，存入结构体数组中
+	while (count < MAX_ACCOUNTS && !feof(file)) {
+		int id = 0;
+		char account[20] = { '\0' };
+		char password[20] = { '\0' };
+		double balance = 0.0;
+		// 从文件中按格式读取账户信息
+		fscanf(file, "%d %19s %19s %lf", &id, account, password, &balance);
+
+		if (feof(file)) {
+			break;
+		}
+
+		// 将账户信息存入结构体数组中
+		accounts[count].id = id;
+		strcpy(accounts[count].account, account);
+		strcpy(accounts[count].password, password);
+		accounts[count].balance = balance;
+		count++;
+	}
+
+	char zh[20] = { '\0' };
+	char mm[20] = { '\0' };
+	int bs = 0;
+	while (sum < MAX_ACCOUNT) {
+		printf("请你输入想要创建的账号：");
+		scanf("%s", zh);
+		for (i = 0; i <= count; i++) {
+			if (strcmp(zh, accounts[i].account) == 0) { // 如果新输入的账号已存在
+				printf("账号相同，请重新输入\n");
+				bs = 1; // 标记账号已存在
+				break;
+			}
+			else
+			bs=0; 
+		}
+		if (bs == 0) // 如果标记为未存在
+			break;
+	}
+	printf("请输入密码:");
+	scanf("%s", mm);
+	printf("\n");
+	double balance = 0.0;
+	fprintf(file, "%d %s %s %.2f\n", id, zh, mm, balance); // 将新账户信息写入文件
+	fclose(file); // 关闭文件
+	printf("恭喜创建成功！！\n");
+	printf( "id：%d 账号：%s 密码：%s 余额：%.2f\n", id, zh, mm, balance);// 打印信息 
+	system("pause");
+	return 0;
+}
+int main() {
+	while(1) {
+		mciSendString(TEXT("open 123.wav alias s1"),NULL,0,NULL);//打开音乐文件
+
+		mciSendString(TEXT("play s1"),NULL,0,NULL);//播放音乐！！！
+		//mciSendString(TEXT("close S1"),NULL,0,NULL);
+		system("cls");
+		csym();
+	}
+	return 0;
+}
